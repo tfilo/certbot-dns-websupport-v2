@@ -1,0 +1,40 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Build in python3
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - run: |
+        python -m pip install build
+        python -m build
+    - name: Upload builded plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: release
+        path: dist/
+
+  pypi-publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+    - name: Download builded plugin
+      uses: actions/download-artifact@v4
+      with:
+        name: release
+        path: dist/
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
