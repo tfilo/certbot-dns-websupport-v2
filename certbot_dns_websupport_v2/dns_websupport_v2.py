@@ -54,7 +54,7 @@ class Authenticator(dns_common.DNSAuthenticator):
         self._get_websupport_client().add_txt_record(validation_name, validation)
 
     def _cleanup(self, domain, validation_name, validation):
-        self._get_websupport_client().del_txt_record(validation_name)
+        self._get_websupport_client().del_txt_record(validation_name, validation)
 
     def _get_websupport_client(self) -> "_WebsupportRestApiV2Client":
         if not self.credentials:  # pragma: no cover
@@ -126,12 +126,12 @@ class _WebsupportRestApiV2Client:
         except:
             print("An error occured while creating record")
 
-    def _find_txt_record(self, validation_name):
+    def _find_txt_record(self, validation_name, validation):
         _validation_name = self.get_validation_name_without_base_domain(validation_name)
         method = "GET"
         path = "/v2/service/%s/dns/record" % (self.service)
         timestamp = int(time.time())
-        query = "?filters%5Bname%5D={}&filters%5Btype%5D%5B0%5D=TXT".format(_validation_name)
+        query = "?filters%5Bname%5D={}&filters%5Btype%5D%5B0%5D=TXT&filters%5Bcontent%5D={}".format(_validation_name, validation)
         headers = self.get_headers(timestamp)
 
         record_id = None
@@ -173,8 +173,8 @@ class _WebsupportRestApiV2Client:
         except:
             print("An error occured while removing record")
 
-    def del_txt_record(self, validation_name):
-        record_id = self._find_txt_record(validation_name)
+    def del_txt_record(self, validation_name, validation):
+        record_id = self._find_txt_record(validation_name, validation)
         if record_id != None:
             self._del_txt_record(record_id)
         else:

@@ -7,11 +7,11 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-version = "1.0.1"
+version = "1.0.2"
 
 # acme/certbot version.
 install_requires = [
-    "certbot>=2.11.0",
+    "certbot>=5.0.0",
     "setuptools",
     "requests",
 ]
